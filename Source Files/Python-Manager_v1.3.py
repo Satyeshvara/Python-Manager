@@ -1,107 +1,113 @@
 import sys
+import subprocess
 import tkinter as tk
 from tkinter import messagebox
 import requests
 from bs4 import BeautifulSoup
-import subprocess
 import webbrowser
 
-def Check_For_Packages():
-    try:
-        Packages = subprocess.run(['pip', 'list'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+class PythonManager:
+    def __init__(self, Window):
+        self.Window = Window
+        self.Window.title("Python Manager")
         
-        if Packages.returncode == 0:
-            return Packages.stdout.splitlines()[2:]
-        else:
-            return ['Error: Failed to view installed Packages!']
+        self.Menu()
+        self.Display()
 
-    except FileNotFoundError:
-        return ['Error: PIP is not installed or not in the PATH']
+    def Menu(self):
+        # Create Menu 
+        self.Menu = tk.Menu(self.Window)
+        self.Window.config(menu=self.Menu)
 
-def Show_Packages():
-    InstalledPackages = Check_For_Packages()
-    List_InstalledPackages = '\n'.join(InstalledPackages)
-    Window_Packages = tk.Toplevel(root)
-    Window_Packages.title("Packages (Installed)")
-    Text_Packages = tk.Text(Window_Packages, height=20, width=50)
-    Text_Packages.pack()
-    Text_Packages.insert(tk.END, List_InstalledPackages)
-    Text_Packages.config(state=tk.DISABLED)
-    
-def Check_For_Update():
-    try:
-        # Fetch the Stable Version from the Official Python Website
-        URL = "https://www.python.org/downloads/"
-        Response = requests.get(URL)
-        Soup = BeautifulSoup(Response.text, "html.parser")
-        StableVersion = Soup.select_one(".download-list-widget .list-row-container li .release-number").text.strip()
+        # Create Menu 'Home'
+        self.Home = tk.Menu(self.Menu, tearoff=0)
+        self.Menu.add_cascade(label="Home", menu=self.Home)
+        self.Home.add_command(label="Exit", command=self.Window.quit)
+
+        # Create Menu 'View'
+        self.View = tk.Menu(self.Menu, tearoff=0)
+        self.Menu.add_cascade(label="View", menu=self.View)
+        self.View.add_command(label="Packages", command=self.Packages)
+
+        # Create Menu 'Downloads'
+        self.Downloads = tk.Menu(self.Menu, tearoff=0)
+        self.Menu.add_cascade(label="Downloads", menu=self.Downloads)
+        self.Downloads.add_command(label="Python (Check for Updates)", command=self.Python_CheckForUpdates)
+        self.Downloads.add_command(label="Python (Check for Latest Version)", command=self.Python_CheckForLatestVersion)
+        self.Downloads.add_command(label="Python Package Index (PyPI)", command=self.PyPI)
+
+        # Create Menu 'Help'
+        self.Help = tk.Menu(self.Menu, tearoff=0)
+        self.Menu.add_cascade(label="Help", menu=self.Help)
+        self.Help.add_command(label="Check for Updates", command=self.Check_for_Updates)
+        self.Help.add_separator()
+        self.Help.add_command(label="About", command=self.About)
+
+    def Packages(self):
+        InstalledPackages = self.Python_Packages()
+        InstalledPackages_List = '\n'.join(InstalledPackages)
+        Window_Packages = tk.Toplevel(self.Window)
+        Window_Packages.title("Packages (Installed)")
+        Display_Packages = tk.Text(Window_Packages, height=20, width=50)
+        Display_Packages.pack()
+        Display_Packages.insert(tk.END, InstalledPackages_List)
+        Display_Packages.config(state=tk.DISABLED)
+
+    def Python_Packages(self):
+        try:
+            All_Packages = subprocess.run(['pip', 'list'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if All_Packages.returncode == 0:
+                return All_Packages.stdout.splitlines()[2:]
+            else:
+                return ['Error: Failed to view installed Packages!']
+        except FileNotFoundError:
+            return ['Error: PIP is not installed or not in the PATH']
         
-        # Compare the Stable Version with the Current Version
-        if StableVersion != sys.version.split()[0]:
-            messagebox.showinfo("Update Available", "Stable Version (Latest): " + StableVersion)
-        else:
-            messagebox.showinfo("Up to Date", "You are using the Stable Version (Latest).")
-    except Exception as e:
-        messagebox.showerror("Error", "Failed to Check for Update.")
+    def Python_CheckForUpdates(self):
+        try:
+            url = "https://www.python.org/downloads/"
+            response = requests.get(url)
+            soup = BeautifulSoup(response.text, "html.parser")
+            stable_version = soup.select_one(".download-list-widget .list-row-container li .release-number").text.strip()
+            if stable_version != sys.version.split()[0]:
+                messagebox.showinfo("Update Available", "Stable Version (Latest): " + stable_version)
+            else:
+                messagebox.showinfo("Up to Date", "You are using the Stable Version (Latest).")
+        except Exception as e:
+            messagebox.showerror("Error", "Failed to Check for Updates.")
 
-def Python_LatestVersion():
-    try:
-        webbrowser.open("https://www.python.org/downloads/")
-    except Exception as e:
-        messagebox.showerror("Error", "Please visit https://www.python.org/downloads/ manually.")
+    def Python_CheckForLatestVersion(self):
+        try:
+            webbrowser.open("https://www.python.org/downloads/")
+        except Exception as e:
+            messagebox.showerror("Error", "Please visit https://www.python.org/downloads/ manually.")
 
-def PyPI():
-    try:
-        webbrowser.open("https://pypi.org/")
-    except Exception as e:
-        messagebox.showerror("Error", "Please visit https://pypi.org/ manually.")
+    def PyPI(self):
+        try:
+            webbrowser.open("https://pypi.org/")
+        except Exception as e:
+            messagebox.showerror("Error", "Please visit https://pypi.org/ manually.")
 
-def About():
-    messagebox.showinfo("About", "Python Manager (v1.3)\nDeveloped by Satish Kumar Singh")
+    def Check_for_Updates(self):
+        webbrowser.open("https://www.github.com/satishkumarsingh2024/Python-Manager/")
 
-def Refresh():
-    CurrentVersion_Label.config(text="Current Version: " + sys.version)
+    def About(self):
+        messagebox.showinfo("About", "Python Manager (v1.3)\nDeveloped by Satish Kumar Singh")
 
-def Exit():
-    root.destroy()
+    def Display(self):
+        self.CurentVersion = tk.Label(self.Window, text="Current Version: " + sys.version)
+        self.CurentVersion.pack(pady=10)
 
-# Main Window
-root = tk.Tk()
-root.title("Python Manager (v1.3)")
+        self.Button_Refresh = tk.Button(self.Window, text="Refresh", command=self.Refresh)
+        self.Button_Refresh.pack(pady=5)
 
-# Top Navigation Bar
-Menu = tk.Menu(root)
-root.config(menu=Menu)
+    def Refresh(self):
+        self.CurentVersion.config(text="Current Version: " + sys.version)
 
-# Menu 'Home'
-Home_Menu = tk.Menu(Menu, tearoff=0)
-Menu.add_cascade(label="Home", menu=Home_Menu)
-Home_Menu.add_command(label="Exit", command=Exit)
+def main():
+    root = tk.Tk()
+    Application = PythonManager(root)
+    root.mainloop()
 
-# Menu 'View'
-View_Menu = tk.Menu(Menu, tearoff=0)
-Menu.add_cascade(label="View", menu=View_Menu)
-View_Menu.add_command(label="Packages", command=Show_Packages)
-
-# Menu 'Downloads'
-Downloads_Menu = tk.Menu(Menu, tearoff=0)
-Menu.add_cascade(label="Downloads", menu=Downloads_Menu)
-Downloads_Menu.add_command(label="Python (Check for Update)", command=Check_For_Update)
-Downloads_Menu.add_command(label="Python (Check for Latest Version)", command=Python_LatestVersion)
-Downloads_Menu.add_command(label="Python Package Index (PyPI)", command=PyPI)
-
-# Menu 'Help'
-Help_Menu = tk.Menu(Menu, tearoff=0)
-Menu.add_cascade(label="Help", menu=Help_Menu)
-Help_Menu.add_command(label="About", command=About)
-
-# Display the Current Version
-CurrentVersion_Label = tk.Label(root, text="Current Version: " + sys.version)
-CurrentVersion_Label.pack(pady=10)
-
-# Button 'Refresh'
-Refresh_Button = tk.Button(root, text="Refresh", command=Refresh)
-Refresh_Button.pack(pady=5)
-
-# Run
-root.mainloop()
+if __name__ == "__main__":
+    main()
