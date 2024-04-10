@@ -89,7 +89,7 @@ class PythonManager:
             messagebox.showerror("Error", "Please visit https://pypi.org/ manually.")
 
     def Check_for_Updates(self):
-        webbrowser.open("https://www.github.com/satishkumarsingh2024/Python-Manager/")
+        webbrowser.open("https://www.github.com/satishkumarsingh2024/Python-Manager")
 
     def About(self):
         messagebox.showinfo("About", "Python Manager (v1.3)\nDeveloped by Satish Kumar Singh")
