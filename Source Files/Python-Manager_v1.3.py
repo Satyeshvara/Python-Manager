@@ -65,12 +65,12 @@ class PythonManager:
         
     def Python_CheckForUpdates(self):
         try:
-            url = "https://www.python.org/downloads/"
-            response = requests.get(url)
-            soup = BeautifulSoup(response.text, "html.parser")
-            stable_version = soup.select_one(".download-list-widget .list-row-container li .release-number").text.strip()
-            if stable_version != sys.version.split()[0]:
-                messagebox.showinfo("Update Available", "Stable Version (Latest): " + stable_version)
+            URL = "https://www.python.org/downloads/"
+            Response = requests.get(URL)
+            Soup = BeautifulSoup(Response.text, "html.parser")
+            Stable_Version = Soup.select_one(".download-list-widget .list-row-container li .release-number").text.strip()
+            if Stable_Version != sys.version.split()[0]:
+                messagebox.showinfo("Update Available", "Stable Version (Latest): " + Stable_Version)
             else:
                 messagebox.showinfo("Up to Date", "You are using the Stable Version (Latest).")
         except Exception as e:
@@ -89,7 +89,7 @@ class PythonManager:
             messagebox.showerror("Error", "Please visit https://pypi.org/ manually.")
 
     def Check_for_Updates(self):
-        webbrowser.open("https://www.github.com/satishkumarsingh2024/Python-Manager")
+        webbrowser.open("https://www.github.com/Satyeshvara/Python-Manager")
 
     def About(self):
         messagebox.showinfo("About", "Python Manager (v1.3)\nDeveloped by Satish Kumar Singh")
